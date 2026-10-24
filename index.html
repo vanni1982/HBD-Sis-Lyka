@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Sis Lyka!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="instruction">🎈 Pindutin ang neon baloons! 🎉</div>
+    
+    <div class="video-box">
+        <video id="myVideo" src="hbd_song.mp4" loop playsinline></video>
+    </div>
+
+    <div class="signature">From: <span class="blink-name">Vanni</span></div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('myVideo');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const neonColors = ['#ff0055', '#00ff66', '#00ffff', '#ffcc00', '#cc00ff', '#ff5500', '#0066ff'];
+        const birthdayWords = ["HAPPY", "BIRTHDAY", "LYKA"];
+        let wordIndex = 0;
+        let hasPlayedVideo = false; 
+
+        let particles = [];
+        let fallingWords = [];
+        let audioCtx = null;
+        const EARTH_GRAVITY = 0.35; 
+
+        function forcePlayVideo() {
+            if (!hasPlayedVideo) {
+                video.muted = true;
+                video.play().then(() => {
+                    setTimeout(() => {
+                        video.muted = false;
+                        video.volume = 1.0;
+                    }, 50);
+                }).catch(err => {
+                    video.muted = false;
+                    video.play();
+                });
+                hasPlayedVideo = true;
+            }
+        }
+
+        document.body.addEventListener('pointerdown', forcePlayVideo, { once: false });
+
+        function playPopSound() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function createConfetti(x, y, color) {
+            for (let i = 0; i < 25; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 5 + 3,
+                    color: color,
+                    speedX: (Math.random() - 0.5) * 9,
+                    speedY: (Math.random() - 0.5) * 9 - 4,
+                    gravity: 0.22,
+                    opacity: 1
+                });
+            }
+        }
+
+        function spawnFallingWord(x, y, text, color) {
+            fallingWords.push({
+                text: text,
+                x: x,
+                y: y,
+                color: color,
+                speedX: (Math.random() - 0.5) * 3, 
+                speedY: -7,                       
+                gravity: EARTH_GRAVITY,           
+                rotation: (Math.random() - 0.5) * 0.2,
+                currentRotation: 0,
+                opacity: 1,
+                fontSize: Math.floor(Math.random() * 6) + 36
+            });
+        }
+
+        function updatePhysics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.speedX; p.y += p.speedY; p.speedY += p.gravity; p.opacity -= 0.025;
+                ctx.save();
+                ctx.globalAlpha = p.opacity; ctx.shadowBlur = 6; ctx.shadowColor = p.color;
+                ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+                if (p.opacity <= 0) particles.splice(i, 1);
+            }
+
+            for (let i = fallingWords.length - 1; i >= 0; i--) {
+                let w = fallingWords[i];
+                w.x += w.speedX; w.y += w.speedY; w.speedY += w.gravity; w.currentRotation += w.rotation;
+                if (w.y > canvas.height * 0.75) w.opacity -= 0.025;
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, w.opacity); ctx.translate(w.x, w.y); ctx.rotate(w.currentRotation);
+                ctx.font = `bold ${w.fontSize}px 'Arial Black', Gadget, sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                
+                ctx.shadowBlur = 25; ctx.shadowColor = w.color; ctx.strokeStyle = w.color; ctx.lineWidth = 8;
+                ctx.strokeText(w.text, 0, 0);
+                ctx.shadowBlur = 8; ctx.shadowColor = w.color; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+                ctx.strokeText(w.text, 0, 0);
+                ctx.shadowBlur = 0; ctx.fillStyle = w.color; ctx.fillText(w.text, 0, 0);
+                ctx.restore();
+
+                if (w.y > canvas.height + 60 || w.opacity <= 0) fallingWords.splice(i, 1);
+            }
+            requestAnimationFrame(updatePhysics);
+        }
+        updatePhysics();
+
+        function spawnBalloon() {
+            if (document.querySelectorAll('.balloon').length > 10) return;
+
+            const balloon = document.createElement('div');
+            balloon.classList.add('balloon');
+            const baseColor = neonColors[Math.floor(Math.random() * neonColors.length)];
+            balloon.style.backgroundColor = baseColor;
+            balloon.style.filter = `drop-shadow(0 0 12px ${baseColor})`;
+            
+            const randomLeft = Math.random() * (window.innerWidth - 95);
+            const randomDuration = 4 + Math.random() * 2.5;
+
+            balloon.style.left = randomLeft + 'px';
+            balloon.style.animationDuration = randomDuration + 's';
+            document.body.appendChild(balloon);
+
+            balloon.addEventListener('animationend', () => balloon.remove());
+
+            balloon.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                playPopSound();
+                forcePlayVideo();
+
+                const currentWord = birthdayWords[wordIndex];
+                createConfetti(e.clientX, e.clientY, baseColor);
+                spawnFallingWord(e.clientX, e.clientY, currentWord, baseColor);
+                wordIndex = (wordIndex + 1) % birthdayWords.length;
+                balloon.remove();
+            });
+        }
+
+        setInterval(spawnBalloon, 1200);
+        spawnBalloon();
+    </script>
+</body>
+</html>
