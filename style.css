@@ -108,7 +108,12 @@ body {
     100% { transform: translate3d(-10px, -130vh, 0) rotate(-4deg); }
 }
 @media (max-width: 600px) {
-    .video-box { width: 140px; height: 85px; right: 70px; bottom: 10px; }
+    .video-box { 
+        width: 140px; 
+        height: 85px; 
+        right: 10px; 
+        bottom: 70px; /* Itinaas din para sa mobile view */
+    }
     .signature { font-size: 1.1rem; left: 10px; bottom: 15px; }
     .instruction { font-size: 1.1rem; }
 }
