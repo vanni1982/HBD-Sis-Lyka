@@ -29,7 +29,7 @@ body {
 .video-box {
     position: absolute;
     right: 20px;
-    bottom: 100px;
+    bottom: 90px; /* Mas itinaas pa para ligtas sa navigation bar kahit naka-Desktop Site */
     width: 260px;
     height: 150px;
     background-color: #000;
@@ -44,10 +44,11 @@ body {
     height: 100%;
     object-fit: cover;
 }
+/* Itinaas din ang From: Vanni Signature para hindi matakpan */
 .signature {
     position: absolute;
     left: 20px;
-    bottom: 25px;
+    bottom: 95px; /* Sinasabayan ang taas ng video box para pantay sila */
     color: #ffffff;
     font-size: 1.4rem;
     font-weight: bold;
@@ -112,8 +113,12 @@ body {
         width: 140px; 
         height: 85px; 
         right: 10px; 
-        bottom: 70px; /* Itinaas din para sa mobile view */
+        bottom: 80px; /* Panatilihing mataas sa normal mobile layout */
     }
-    .signature { font-size: 1.1rem; left: 10px; bottom: 15px; }
+    .signature { 
+        font-size: 1.1rem; 
+        left: 10px; 
+        bottom: 85px; /* Itinaas din para sa mobile layout */
+    }
     .instruction { font-size: 1.1rem; }
 }
